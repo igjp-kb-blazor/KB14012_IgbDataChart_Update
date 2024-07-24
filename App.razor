@@ -1,0 +1,97 @@
+﻿<div style="max-width: 600px; margin: auto; padding: 24px; display: flex; flex-direction: column; gap: 24px;">
+    <IgbLegend @ref="_legend"></IgbLegend>
+
+    <IgbDataChart Width="100%" @ref="myChart"
+                  Height="300px"
+                  Legend="_legend"
+                  ComputedPlotAreaMarginMode="ComputedPlotAreaMarginMode.Series">
+        <IgbCategoryXAxis Name="xAxis"
+                          DataSource="_data"
+                          Label="@nameof(DataItem.Index)"
+                          MajorStroke="1">
+        </IgbCategoryXAxis>
+
+        <IgbNumericYAxis Name="yAxis" MinimumValue="0"></IgbNumericYAxis>
+
+        <IgbLineSeries Title="Sample Data"
+                       DataSource="_data"
+                       XAxisName="xAxis"
+                       YAxisName="yAxis"
+                       ValueMemberPath="@nameof(DataItem.Value)">
+        </IgbLineSeries>
+    </IgbDataChart>
+    <div>
+        <IgbButton @onclick="IncreaseValues">増加</IgbButton>
+        <IgbButton @onclick="DecreaseValues">減少</IgbButton>
+        <IgbButton @onclick="AddValues">追加</IgbButton>
+        <IgbButton @onclick="ClearValues">クリア</IgbButton>
+    </div>
+</div>
+
+@code {
+    private IgbDataChart? myChart;
+    public class DataItem
+    {
+        public int Index { get; set; }
+        public double? Value { get; set; }
+    }
+
+    private List<DataItem> _data = new()
+    {
+        new(){ Index = 0, Value = 6 },
+        new(){ Index = 1, Value = 8 },
+        new(){ Index = 2, Value = 5 },
+        new(){ Index = 3, Value = 7 },
+        new(){ Index = 4, Value = 9 },
+        new(){ Index = 5, Value = 6 },
+        new(){ Index = 6, Value = 8 },
+    };
+
+    private IgbLegend? _legend;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            this.StateHasChanged();
+        }
+    }
+
+    private void IncreaseValues()
+    {
+        var random = new Random();
+        foreach (var item in _data)
+        {
+            item.Value += 1 + random.NextDouble() * 1;
+        }
+        // データソースがクリアされ、更新が必要であることをチャートに通知します
+        myChart?.NotifyClearItems(_data);
+    }
+
+    private async Task DecreaseValues()
+    {
+        var random = new Random();
+        foreach (var item in _data)
+        {
+            item.Value -= 1 + random.NextDouble() * 1;
+        }
+        // データソースがクリアされ、更新が必要であることをチャートに通知します
+        myChart?.NotifyClearItems(_data);
+    }
+    private void AddValues()
+    {
+        var random = new Random();
+        var newIndex = _data.Count;
+        var newValue = 1 + random.NextDouble() * 15;
+        _data.Add(new DataItem { Index = newIndex, Value = newValue });
+        // データソースがクリアされ、更新が必要であることをチャートに通知します
+        myChart?.NotifyClearItems(_data);
+    }
+
+    private void ClearValues()
+    {
+        _data.Clear();
+        // データソースがクリアされ、更新が必要であることをチャートに通知します
+        myChart?.NotifyClearItems(_data);
+    }
+}
